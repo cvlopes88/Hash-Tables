@@ -102,7 +102,7 @@ if __name__ == "__main__":
     print(ht.retrieve("line_2"))
     print(ht.retrieve("line_3"))
 
-    # Test resizing
+    # Test resizingg
     old_capacity = len(ht.storage)
     ht.resize()
     new_capacity = len(ht.storage)
