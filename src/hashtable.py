@@ -15,6 +15,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity  # Number of buckets in the hash table
         self.storage = [None] * capacity
+        self.count = 0
 
 
     def _hash(self, key):
@@ -44,14 +45,32 @@ class HashTable:
 
 
     def insert(self, key, value):
+
+        # check if have space
+        if self.count >= self.capacity:
+            self.resize()
+        # make sure index in range
+        if key > self.count:
+            print("ERROR: Index out of Range")
+            return
+        # Start with the last one and move everything to the right
+        for i in range(self.count, key, -1):
+            self.storage[i] = self.storage[i-1]
+        # insert our value
+        self.storage[key] = value
+        self.count += 1
+
         '''
         Store the value with the given key.
 
         Hash collisions should be handled with Linked List Chaining.
 
         Fill this in.
+         # calculate the key with the hash
+         # if count < capacity
+         # if value at that index is None
         '''
-        pass
+
 
 
 
@@ -74,7 +93,14 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        index = self.hash(key)
+        if self.storage[index] is None:
+            print("ERROR: that key dont exist")
+        else:
+            # loop through and see if u find the value
+            for i in self.storage[index]:
+                if i[0] == key:
+                    return i[1]
 
 
     def resize(self):
@@ -84,7 +110,15 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        # store reference to old storage
+        # double the capacity by multiplying self.capacity by 2
+        # reassign self.storage to [None] * capacity
+        self.capacity *= 2
+        new_storage = [None] * self.capacity
+        for i in range(self.count):
+            new_storage[i] = self.storage[i]
+
+        self.storage = new_storage
 
 
 
@@ -102,7 +136,7 @@ if __name__ == "__main__":
     print(ht.retrieve("line_2"))
     print(ht.retrieve("line_3"))
 
-    # Test resizing
+    # Test resizingg
     old_capacity = len(ht.storage)
     ht.resize()
     new_capacity = len(ht.storage)
