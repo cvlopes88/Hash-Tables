@@ -1,0 +1,21 @@
+import random
+
+def how_many_before_collision(buckets, loops=1):
+        # roll random hashes index into buckets and print how many before collision
+        for i in range(loops):
+            tries = 0
+            tried = set()
+
+            while True:
+                random_key = str(random.random())
+                hash_index = hash(random_key) % buckets
+                if hash_index not in tried:
+                    tried.add(hash_index)
+                    tries += 1
+                else:
+                    # we found a collision
+                    break
+            print(f"{buckets} buckets, {tries} hashes before collision")
+
+
+how_many_before_collision(100, 1)

@@ -1,3 +1,4 @@
+import hashlib
 # '''
 # Linked List hash table key/value pair
 # '''
@@ -15,7 +16,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity  # Number of buckets in the hash table
         self.storage = [None] * capacity
-        self.count = 0
+
 
 
     def _hash(self, key):
@@ -24,7 +25,8 @@ class HashTable:
 
         You may replace the Python hash with DJB2 as a stretch goal.
         '''
-        return hash(key)
+
+        return hashlib.sha256(key.encode())
 
 
     def _hash_djb2(self, key):
@@ -46,20 +48,32 @@ class HashTable:
 
     def insert(self, key, value):
 
-        # check if have space
-        if self.count >= self.capacity:
-            self.resize()
-        # make sure index in range
-        if key > self.count:
-            print("ERROR: Index out of Range")
-            return
-        # Start with the last one and move everything to the right
-        for i in range(self.count, key, -1):
-            self.storage[i] = self.storage[i-1]
-        # insert our value
-        self.storage[key] = value
-        self.count += 1
+        index = self._hash_mod(key)
+        # create a new linked list node using key and value
+        new_node = LinkedPair(key, value)
 
+        # traverse the linked list in storage at generated index
+        cur = self.storage[index]
+        # if no list exists, new node becomes the head
+        if cur is None:
+            self.storage[index] = new_node
+            return
+        prev = None
+        while cur is not None:
+            # if key in list matches given key, overwrite value
+            if cur.key == key:
+                cur.value = value
+                return
+            prev = cur
+            cur = cur.next
+        # if reach end of list, add new node
+        prev.next = new_node
+        self.size += 1
+        # find load factor
+        lf = self.size / self.capacity
+        # if load factor is greater than 0.7, resize hash table
+        if lf > 0.7:
+            self.resize(2)
         '''
         Store the value with the given key.
 
@@ -82,8 +96,12 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
+        index = self._hash_mod(key)
 
+        if self.storage[index] is not None:
+            self.storage[index] = None
+        else:
+            print("Key not Found")
 
     def retrieve(self, key):
         '''
@@ -93,15 +111,17 @@ class HashTable:
 
         Fill this in.
         '''
-        index = self.hash(key)
-        if self.storage[index] is None:
-            print("ERROR: that key dont exist")
-        else:
-            # loop through and see if u find the value
-            for i in self.storage[index]:
-                if i[0] == key:
-                    return i[1]
+        # index = self._hash(key)
+        # if self.storage[index] is None:
+        #     print("ERROR: that key dont exist")
+        # else:
+        #     # loop through and see if u find the value
+        #     for i in self.storage[index]:
+        #         if i[0] == key:
+        #             return i[1]
+        index = self._hash_mod(key)
 
+        return self.storage[index]
 
     def resize(self):
         '''
@@ -110,16 +130,21 @@ class HashTable:
 
         Fill this in.
         '''
+
         # store reference to old storage
         # double the capacity by multiplying self.capacity by 2
         # reassign self.storage to [None] * capacity
-        self.capacity *= 2
-        new_storage = [None] * self.capacity
-        for i in range(self.count):
-            new_storage[i] = self.storage[i]
+        # self.capacity *= 2
+        # new_storage = [None] * self.capacity
+        # for i in range(self.count):
+        #     new_storage[i] = self.storage[i]
+        # self.storage = new_storage
+        old_storage = self.storage
+        self.capacity = self.capacity * 2
+        self.storage = [None] * self.capacity
 
-        self.storage = new_storage
-
+        for bucket_item in old_storage:
+            self.insert(bucket_item)
 
 
 if __name__ == "__main__":
